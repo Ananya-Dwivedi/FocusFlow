@@ -8,19 +8,15 @@ import SearchBar from "./components/SearchBar.jsx";
 import FilterBar from "./components/FilterBar.jsx";
 import SortBar from "./components/SortBar.jsx";
 import ThemeToggle from "./components/ThemeToggle.jsx";
+import Sidebar from "./components/Sidebar.jsx";
+
 
 import taskReducer from "./taskReducer.js";
 import "./App.css";
 
 // Load saved tasks, or create the initial example task.
 function loadTasks() {
-  const savedTasks = localStorage.getItem("tasks");
-
-  if (savedTasks) {
-    return JSON.parse(savedTasks);
-  }
-
-  return [
+    const initialTasks = [
     {
       id: crypto.randomUUID(),
       title: "Complete React useEffect revision",
@@ -31,6 +27,25 @@ function loadTasks() {
       dueDate: "2026-10-12"
     }
   ];
+
+  try {
+    const savedTasks = localStorage.getItem("tasks");
+
+    if (savedTasks === null) {
+      return initialTasks;
+    }
+
+    const parsedTasks = JSON.parse(savedTasks);
+
+    if (!Array.isArray(parsedTasks)) {
+      return initialTasks;
+    }
+
+    return parsedTasks;
+  } catch (error) {
+    console.error("Failed to load saved tasks:", error);
+    return initialTasks;
+  }
 }
 
 function App() {
@@ -45,7 +60,7 @@ function App() {
   const [editingTask, setEditingTask] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("all");
-  const [sortOption, setSortOption] = useState("newest");
+  const [sortOption, setSortOption] = useState("none");
 
   const [theme, setTheme] = useState(() => {
   return localStorage.getItem("theme") || "light";
@@ -68,32 +83,39 @@ function App() {
     return searchMatches && filterMatches;
   });
 
-  // Sort the filtered tasks.
-  const sortedTasks = [...filteredTasks].sort((a, b) => {
-    if (sortOption === "newest") {
-      return new Date(b.createdAt) - new Date(a.createdAt);
+  const sortedTasks = [...filteredTasks];
+
+    if (sortOption !== "none") {
+      sortedTasks.sort((a, b) => {
+        if (sortOption === "newest") {
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        }
+
+        if (sortOption === "oldest") {
+          return new Date(a.createdAt) - new Date(b.createdAt);
+        }
+
+        if (sortOption === "dueDate") {
+          if (!a.dueDate && !b.dueDate) return 0;
+          if (!a.dueDate) return 1;
+          if (!b.dueDate) return -1;
+
+          return new Date(a.dueDate) - new Date(b.dueDate);
+        }
+
+        if (sortOption === "priority") {
+          const priorityOrder = {
+            high: 1,
+            medium: 2,
+            low: 3
+          };
+
+          return priorityOrder[a.priority] - priorityOrder[b.priority];
+        }
+
+        return 0;
+      });
     }
-
-    if (sortOption === "oldest") {
-      return new Date(a.createdAt) - new Date(b.createdAt);
-    }
-
-    if (sortOption === "dueDate") {
-      return new Date(a.dueDate) - new Date(b.dueDate);
-    }
-
-    if (sortOption === "priority") {
-      const priorityOrder = {
-        high: 1,
-        medium: 2,
-        low: 3
-      };
-
-      return priorityOrder[a.priority] - priorityOrder[b.priority];
-    }
-
-    return 0;
-  });
 
   // Save tasks whenever the task state changes.
   useEffect(() => {
@@ -141,9 +163,18 @@ function App() {
     setEditingTask(null);
   }
 
+  function handleCancelEdit() {
+  setEditingTask(null);
+}
+
   return (
     <div className="app">
-      <Header />
+
+        <Sidebar />
+
+      <main className="app-main">
+
+             <Header />
 
        <ThemeToggle theme={theme} setTheme={setTheme} />
 
@@ -153,6 +184,8 @@ function App() {
         onAddTask={handleAddTask}
         editingTask={editingTask}
         onUpdateTask={handleUpdateTask}
+        onCancelEdit={handleCancelEdit}
+
       />
 
       <SearchBar
@@ -172,10 +205,14 @@ function App() {
 
       <TaskList
         tasks={sortedTasks}
+        totalTasks={tasks.length}
         onToggleTask={handleToggleTask}
         onDeleteTask={handleDeleteTask}
         onEditTask={handleEditTask}
       />
+
+      </main>
+   
     </div>
   );
 }

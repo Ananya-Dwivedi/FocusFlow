@@ -5,6 +5,7 @@ function SortBar({ sortOption, onSort }) {
         value={sortOption}
         onChange={(event) => onSort(event.target.value)}
       >
+        <option value="none">Default Order</option>
         <option value="newest">Newest First</option>
         <option value="oldest">Oldest First</option>
         <option value="dueDate">Due Date</option>

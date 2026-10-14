@@ -1,12 +1,23 @@
 
 import { useState,useEffect } from "react";
 
-function TaskForm({ onAddTask, editingTask,onUpdateTask }) {
+function TaskForm({ onAddTask, editingTask,onUpdateTask , onCancelEdit}) {
 
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [priority, setPriority] = useState("");
   const [dueDate, setDueDate] = useState("");
+
+  const [titleError, setTitleError] = useState("");
+
+
+  function resetForm() {
+    setTitle("");
+    setCategory("");
+    setPriority("");
+    setDueDate("");
+    setTitleError("");
+}
 
 
   useEffect(() => {
@@ -15,6 +26,8 @@ function TaskForm({ onAddTask, editingTask,onUpdateTask }) {
     setCategory(editingTask.category);
     setPriority(editingTask.priority);
     setDueDate(editingTask.dueDate);
+  } else {
+    resetForm();
   }
 }, [editingTask]);
 
@@ -22,11 +35,18 @@ function TaskForm({ onAddTask, editingTask,onUpdateTask }) {
   function handleSubmit(event) {
     event.preventDefault();
 
+    const trimmedTitle = title.trim();
+
+    if (!trimmedTitle) {
+      setTitleError("Task title cannot be empty.");
+      return;
+    }
+
 
   if (editingTask) {
     const updatedTask = {
       ...editingTask,
-      title: title,
+      title: trimmedTitle,
       category: category,
       priority: priority,
       dueDate: dueDate
@@ -38,7 +58,7 @@ function TaskForm({ onAddTask, editingTask,onUpdateTask }) {
 
     const newTask = {
         id: crypto.randomUUID(),
-        title: title,
+        title: trimmedTitle,
         completed: false,
         priority: priority,
         category: category,
@@ -50,6 +70,8 @@ function TaskForm({ onAddTask, editingTask,onUpdateTask }) {
     };
 
     onAddTask(newTask);
+    resetForm();
+
   }
 
   return (
@@ -68,6 +90,11 @@ function TaskForm({ onAddTask, editingTask,onUpdateTask }) {
             onChange={(event) => setTitle(event.target.value)}
             placeholder="What do you need to do?"
           />
+          {titleError && (
+          <p className="form-error" role="alert">
+            {titleError}
+          </p>
+        )}
         </div>
 
         <div className="form-row">
@@ -109,6 +136,16 @@ function TaskForm({ onAddTask, editingTask,onUpdateTask }) {
         <button className="primary-button" type="submit">
           {editingTask ? "Save Changes" : "Add Task"}
         </button>
+
+        {editingTask && (
+          <button
+            type="button"
+             className="cancel-button"
+            onClick={onCancelEdit}
+          >
+            Cancel
+          </button>
+        )}
 
       </form>
     </section>
