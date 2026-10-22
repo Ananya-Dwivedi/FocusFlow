@@ -1,21 +1,61 @@
 :root {
   color-scheme: light;
-  --app-bg: #f3f5f9;
+
+  --app-bg: #f8f5f7;
   --surface-bg: #ffffff;
-  --text-color: #172033;
-  --muted-text: #64748b;
-  --border-color: #e2e8f0;
+  --card-bg: #ffffff;
   --input-bg: #ffffff;
+
+  --text-color: #29242d;
+  --muted-text: #716773;
+  --border-color: #e8dfe6;
+
+  --accent-color: #c58aae;
+  --accent-hover: #b7779d;
+  --accent-soft: #f3e3ed;
+
+  --sidebar-bg: #29242d;
+  --sidebar-text: #e9dfe7;
+  --sidebar-muted: #c5b7c4;
+  --sidebar-hover: #403541;
+  --sidebar-active: #51404e;
+
+  --success-bg: #e1ebdd;
+  --success-text: #41613a;
+  --danger-bg: #f8e2e5;
+  --danger-text: #a33d50;
+
+  --shadow-color: rgb(41 36 45 / 6%);
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --app-bg: #171b2b;
-  --surface-bg: #242a3d;
-  --text-color: #f1f5f9;
-  --muted-text: #aab4ca;
-  --border-color: #3b435a;
-  --input-bg: #1c2234;
+
+  --app-bg: #17151b;
+  --surface-bg: #29242d;
+  --card-bg: #302a34;
+  --input-bg: #211d25;
+
+  --text-color: #f8f5f7;
+  --muted-text: #c9bcc8;
+  --border-color: #49404b;
+
+  --accent-color: #c58aae;
+  --accent-hover: #d5a4c3;
+  --accent-soft: #493442;
+
+  --sidebar-bg: #111015;
+  --sidebar-text: #f8f5f7;
+  --sidebar-muted: #c9bcc8;
+  --sidebar-hover: #29242d;
+  --sidebar-active: #493442;
+
+  --success-bg: #293b2b;
+  --success-text: #b9d7af;
+  --danger-bg: #47282f;
+  --danger-text: #f1b7c1;
+
+  --shadow-color: rgb(0 0 0 / 20%);
 }
 
 body {
@@ -23,8 +63,28 @@ body {
   background-color: var(--app-bg);
   color: var(--text-color);
   transition:
-    background-color 0.2s,
-    color 0.2s;
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+.app,
+.app-main,
+.sidebar,
+.stat-card,
+.task-form-section,
+.task-card,
+.project-card,
+.projects-empty-state,
+.kanban-column,
+.kanban-task,
+.calendar-page,
+.calendar-day,
+.calendar-selected-tasks {
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
 .app {
@@ -376,6 +436,12 @@ body {
   line-height: 1;
 }
 
+.global-theme-toggle {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 24px 0;
+}
+
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -419,13 +485,14 @@ body {
   flex-shrink: 0;
   padding: 24px 16px;
   box-sizing: border-box;
-  background: #20243a;
-  color: #ffffff;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
 }
 
 .sidebar-brand {
   margin-bottom: 28px;
   padding: 0 8px;
+  color: var(--sidebar-muted);
 }
 
 .sidebar-brand h2 {
@@ -453,21 +520,25 @@ body {
   padding: 12px;
   border: none;
   border-radius: 8px;
-  background: transparent;
-  color: #c3c8d9;
+
   font: inherit;
   text-align: left;
   cursor: pointer;
+  color: var(--sidebar-muted);
+  background: transparent;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .sidebar-link:hover {
-  background: #343a54;
-  color: #ffffff;
+  background: var(--sidebar-hover);
+  color: var(--sidebar-text);
 }
 
 .sidebar-link.active {
-  background: #424968;
-  color: #ffffff;
+  background: var(--sidebar-active);
+  color: var(--sidebar-text);
 }
 
 .sidebar-link span:first-child {
@@ -516,4 +587,372 @@ body {
 
 .cancel-button:hover {
   background-color: var(--app-bg);
+}
+
+.projects-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.project-card,
+.projects-empty-state {
+  padding: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+}
+
+.page-content {
+  color: var(--text-color);
+}
+
+.project-card h2,
+.projects-empty-state h2 {
+  margin-top: 0;
+}
+
+.page-content form {
+  display: grid;
+  gap: 10px;
+  max-width: 560px;
+  margin-top: 24px;
+}
+
+.page-content input,
+.page-content textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.page-content textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.page-content button {
+  width: fit-content;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* =========================
+   FocusFlow — Projects Page
+   ========================= */
+
+.page-content {
+  color: var(--text-color);
+}
+
+.page-header {
+  margin-bottom: 28px;
+}
+
+.page-header h1 {
+  margin: 0 0 8px;
+  font-size: clamp(1.8rem, 3vw, 2.3rem);
+  font-weight: 750;
+  letter-spacing: -0.045em;
+}
+
+.page-header p {
+  margin: 0;
+  color: var(--muted-text);
+  line-height: 1.6;
+}
+
+/* Project creation form */
+
+.page-content form {
+  display: grid;
+  gap: 10px;
+  max-width: 620px;
+  margin-top: 28px;
+  padding: 24px;
+  background: var(--surface-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgb(20 25 45 / 5%);
+}
+
+.page-content form label {
+  margin-top: 4px;
+  color: var(--text-color);
+  font-size: 0.88rem;
+  font-weight: 650;
+}
+
+.page-content input,
+.page-content textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  color: var(--text-color);
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  font: inherit;
+  font-size: 0.94rem;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.page-content input::placeholder,
+.page-content textarea::placeholder {
+  color: var(--muted-text);
+  opacity: 0.8;
+}
+
+.page-content input:focus,
+.page-content textarea:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 18%, transparent);
+}
+
+.page-content textarea {
+  min-height: 110px;
+  resize: vertical;
+  line-height: 1.55;
+}
+
+/* Buttons */
+
+.page-content button {
+  width: fit-content;
+  margin-top: 8px;
+  padding: 11px 17px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    transform 0.2s,
+    border-color 0.2s;
+}
+
+.page-content form button {
+  margin-top: 10px;
+  color: #fff;
+  background: #6d5ce8;
+}
+
+:root[data-theme="dark"] .page-content form button {
+  color: #19152e;
+  background: var(--accent-color);
+}
+
+.page-content form button:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+/* Project cards */
+
+.projects-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+  gap: 18px;
+  margin-top: 28px;
+}
+
+.project-card,
+.projects-empty-state {
+  min-width: 0;
+  padding: 22px;
+  color: var(--text-color);
+  background: var(--surface-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgb(20 25 45 / 4%);
+  transition:
+    border-color 0.2s,
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.project-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent-color);
+  box-shadow: 0 12px 28px rgb(20 25 45 / 8%);
+}
+
+.project-card h2,
+.projects-empty-state h2 {
+  margin: 0 0 10px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+
+.project-card p,
+.projects-empty-state p {
+  margin: 0;
+  color: var(--muted-text);
+  font-size: 0.93rem;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.project-card button {
+  color: var(--muted-text);
+  background: transparent;
+  border-color: var(--border-color);
+}
+
+.project-card button:hover {
+  color: #dc5656;
+  background: rgb(220 86 86 / 8%);
+  border-color: rgb(220 86 86 / 35%);
+}
+
+/* Empty state */
+
+.projects-empty-state {
+  grid-column: 1 / -1;
+  padding: 34px 24px;
+  border-style: dashed;
+  box-shadow: none;
+}
+
+@media (max-width: 700px) {
+  .app-main {
+    padding: 18px;
+  }
+
+  .page-content form {
+    padding: 18px;
+  }
+
+  .projects-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kanban-page {
+  padding: 28px;
+  color: var(--text-color);
+}
+
+.kanban-header {
+  margin-bottom: 24px;
+}
+
+.kanban-header h1 {
+  margin: 0 0 8px;
+}
+
+.kanban-header p {
+  margin: 0;
+  opacity: 0.7;
+}
+
+.kanban-columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.kanban-column {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--border-color, #d8dce5);
+  border-radius: 16px;
+
+  color: var(--text-color);
+  background: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+.kanban-column-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.kanban-column-header h2 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.kanban-column-header span {
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--border-color, #e1e5ec);
+  font-size: 0.8rem;
+}
+
+.kanban-task-list {
+  display: grid;
+  gap: 12px;
+}
+
+.kanban-task {
+  padding: 14px;
+  border: 1px solid var(--border-color, #d8dce5);
+  border-radius: 12px;
+
+  overflow-wrap: anywhere;
+  color: var(--text-color);
+  background: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+.kanban-task h3 {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+}
+
+.kanban-task p {
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
+.kanban-task-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.kanban-task-actions button {
+  padding: 7px 10px;
+  border: 1px solid var(--border-color, #d8dce5);
+  border-radius: 8px;
+
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--text-color);
+  background: transparent;
+  border-color: var(--border-color);
+}
+
+.kanban-task-actions button:hover {
+  background: var(--border-color, #e8ebf0);
+}
+
+.kanban-empty {
+  padding: 18px 8px;
+  text-align: center;
+  font-size: 0.85rem;
+  opacity: 0.65;
+}
+
+@media (max-width: 900px) {
+  .kanban-columns {
+    grid-template-columns: 1fr;
+  }
 }

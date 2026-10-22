@@ -1,18 +1,16 @@
 
-import { useState } from "react";
+import { NavLink } from "react-router-dom";
 
 const navigationItems = [
-  { id: "dashboard", label: "Dashboard", icon: "▦" },
-  { id: "projects", label: "Projects", icon: "▤" },
-  { id: "kanban", label: "Kanban Board", icon: "▥" },
-  { id: "calendar", label: "Calendar", icon: "▦" },
-  { id: "timer", label: "Focus Timer", icon: "◷" },
-  { id: "ai", label: "AI Assistant", icon: "✧" }
+  { id: "dashboard", label: "Dashboard", path: "/", icon: "▦" },
+  { id: "projects", label: "Projects", path: "/projects", icon: "▤" },
+  { id: "kanban", label: "Kanban Board", path: "/kanban", icon: "▥" },
+  { id: "calendar", label: "Calendar", path: "/calendar", icon: "▦" },
+  { id: "timer", label: "Focus Timer", path: "/timer", icon: "◷" },
+  { id: "ai", label: "AI Assistant", path: "/assistant", icon: "✧" }
 ];
 
 function Sidebar() {
-  const [activePage, setActivePage] = useState("dashboard");
-
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
@@ -22,17 +20,17 @@ function Sidebar() {
 
       <nav aria-label="Main navigation">
         {navigationItems.map((item) => (
-          <button
+          <NavLink
             key={item.id}
-            type="button"
-            className={`sidebar-link ${
-              activePage === item.id ? "active" : ""
-            }`}
-            onClick={() => setActivePage(item.id)}
+            to={item.path}
+            end={item.path === "/"}
+            className={({ isActive }) =>
+              `sidebar-link ${isActive ? "active" : ""}`
+            }
           >
             <span aria-hidden="true">{item.icon}</span>
             <span>{item.label}</span>
-          </button>
+          </NavLink>
         ))}
       </nav>
     </aside>

@@ -18,6 +18,17 @@ function taskReducer(state, action) {
         task.id === action.payload.id ? action.payload : task,
       );
 
+    case "UPDATE_TASK_STATUS":
+      return state.map((task) =>
+        task.id === action.payload.id
+          ? {
+              ...task,
+              status: action.payload.status,
+              completed: action.payload.status === "done",
+            }
+          : task,
+      );
+
     default:
       return state;
   }

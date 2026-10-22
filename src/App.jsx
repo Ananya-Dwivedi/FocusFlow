@@ -1,15 +1,17 @@
 import { useReducer, useState, useEffect } from "react";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Outlet
+} from "react-router-dom";
 
-import Header from "./components/Header.jsx";
-import Statistics from "./components/Stats.jsx";
-import TaskForm from "./components/TaskForm.jsx";
-import TaskList from "./components/TaskList.jsx";
-import SearchBar from "./components/SearchBar.jsx";
-import FilterBar from "./components/FilterBar.jsx";
-import SortBar from "./components/SortBar.jsx";
-import ThemeToggle from "./components/ThemeToggle.jsx";
+import DashboardPage from "./pages/DashboardPage.jsx";
+import ProjectsPage from "./pages/ProjectsPage.jsx";
+import KanbanPage from "./pages/KanbanPage.jsx";
+
 import Sidebar from "./components/Sidebar.jsx";
-
+import ThemeToggle from "./components/ThemeToggle.jsx";
 
 import taskReducer from "./taskReducer.js";
 import "./App.css";
@@ -21,6 +23,7 @@ function loadTasks() {
       id: crypto.randomUUID(),
       title: "Complete React useEffect revision",
       completed: false,
+      status: "todo",
       priority: "high",
       category: "React",
       createdAt: new Date().toISOString(),
@@ -41,11 +44,30 @@ function loadTasks() {
       return initialTasks;
     }
 
-    return parsedTasks;
+    return parsedTasks.map((task) => ({
+  ...task,
+  status: task.status ?? (task.completed ? "done" : "todo"),
+}));
+
+
   } catch (error) {
     console.error("Failed to load saved tasks:", error);
     return initialTasks;
   }
+}
+function AppLayout({theme,setTheme}) {
+  return (
+    <div className="app">
+      <Sidebar />
+
+      <main className="app-main">
+        <div className="global-theme-toggle">
+          <ThemeToggle theme={theme} setTheme={setTheme} />
+        </div>
+        <Outlet />
+      </main>
+    </div>
+  );
 }
 
 function App() {
@@ -163,58 +185,68 @@ function App() {
     setEditingTask(null);
   }
 
+  function handleUpdateTaskStatus(taskId, status) {
+  dispatch({
+    type: "UPDATE_TASK_STATUS",
+    payload: {
+      id: taskId,
+      status: status,
+    },
+  });
+}
+
   function handleCancelEdit() {
   setEditingTask(null);
 }
 
-  return (
-    <div className="app">
+  
 
-        <Sidebar />
-
-      <main className="app-main">
-
-             <Header />
-
-       <ThemeToggle theme={theme} setTheme={setTheme} />
-
-      <Statistics tasks={tasks} />
-
-      <TaskForm
-        onAddTask={handleAddTask}
-        editingTask={editingTask}
-        onUpdateTask={handleUpdateTask}
-        onCancelEdit={handleCancelEdit}
-
+return (
+  <BrowserRouter>
+    <Routes>
+      <Route element={<AppLayout theme={theme} setTheme={setTheme} />}>
+        <Route
+          path="/"
+          element={
+            <DashboardPage
+              tasks={tasks}
+              theme={theme}
+              setTheme={setTheme}
+              editingTask={editingTask}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              filter={filter}
+              setFilter={setFilter}
+              sortOption={sortOption}
+              setSortOption={setSortOption}
+              sortedTasks={sortedTasks}
+              onAddTask={handleAddTask}
+              onToggleTask={handleToggleTask}
+              onDeleteTask={handleDeleteTask}
+              onEditTask={handleEditTask}
+              onUpdateTask={handleUpdateTask}
+              onCancelEdit={handleCancelEdit}
+            />
+          }
+        />
+      
+      <Route
+        path="/projects"
+        element={<ProjectsPage />}
       />
-
-      <SearchBar
-        searchTerm={searchTerm}
-        onSearch={setSearchTerm}
-      />
-
-      <FilterBar
-        filter={filter}
-        onFilter={setFilter}
-      />
-
-      <SortBar
-        sortOption={sortOption}
-        onSort={setSortOption}
-      />
-
-      <TaskList
-        tasks={sortedTasks}
-        totalTasks={tasks.length}
-        onToggleTask={handleToggleTask}
-        onDeleteTask={handleDeleteTask}
-        onEditTask={handleEditTask}
-      />
-
-      </main>
-   
-    </div>
-  );
+      <Route
+          path="/kanban"
+          element={
+            <KanbanPage
+              tasks={tasks}
+      onUpdateTaskStatus={handleUpdateTaskStatus}
+    />
+  }
+/>
+      </Route>
+    </Routes>
+  </BrowserRouter>
+);
 }
 
 export default App;
