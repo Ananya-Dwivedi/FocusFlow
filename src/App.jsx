@@ -9,6 +9,8 @@ import {
 import DashboardPage from "./pages/DashboardPage.jsx";
 import ProjectsPage from "./pages/ProjectsPage.jsx";
 import KanbanPage from "./pages/KanbanPage.jsx";
+import CalendarPage from "./pages/CalendarPage.jsx";
+import TimerPage from "./pages/TimerPage.jsx";
 
 import Sidebar from "./components/Sidebar.jsx";
 import ThemeToggle from "./components/ThemeToggle.jsx";
@@ -241,8 +243,20 @@ return (
               tasks={tasks}
       onUpdateTaskStatus={handleUpdateTaskStatus}
     />
+
   }
 />
+ 
+      <Route
+        path="/calendar"
+        element={<CalendarPage />}
+      />
+      <Route
+        path="/timer"
+        element={<TimerPage />}
+      />
+
+
       </Route>
     </Routes>
   </BrowserRouter>
