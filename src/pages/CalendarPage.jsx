@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 
 function CalendarPage({ tasks = [] }) {
@@ -7,23 +6,15 @@ function CalendarPage({ tasks = [] }) {
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
-
-  // Find the weekday of the month's first day.
   const firstDay = new Date(year, month, 1).getDay();
-
-  // Find how many days this month contains.
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  // Create calendar cells, including empty cells before day 1.
   const calendarDays = [
     ...Array(firstDay).fill(null),
-    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+    ...Array.from({ length: daysInMonth }, (_, index) => index + 1),
   ];
 
-  // Add empty cells to complete the final week.
-  while (calendarDays.length % 7 !== 0) {
-    calendarDays.push(null);
-  }
+  while (calendarDays.length % 7 !== 0) calendarDays.push(null);
 
   function changeMonth(amount) {
     setCurrentDate(new Date(year, month + amount, 1));
@@ -32,7 +23,6 @@ function CalendarPage({ tasks = [] }) {
 
   function getTasksForDay(day) {
     if (!day) return [];
-
     const dateKey = [
       year,
       String(month + 1).padStart(2, "0"),
@@ -42,9 +32,7 @@ function CalendarPage({ tasks = [] }) {
     return tasks.filter((task) => task.dueDate === dateKey);
   }
 
-  const selectedTasks = selectedDate
-    ? getTasksForDay(selectedDate)
-    : [];
+  const selectedTasks = selectedDate ? getTasksForDay(selectedDate) : [];
 
   return (
     <section className="calendar-page">
@@ -58,7 +46,6 @@ function CalendarPage({ tasks = [] }) {
           <button type="button" onClick={() => changeMonth(-1)}>
             &larr;
           </button>
-
           <button
             type="button"
             onClick={() => {
@@ -68,7 +55,6 @@ function CalendarPage({ tasks = [] }) {
           >
             Today
           </button>
-
           <button type="button" onClick={() => changeMonth(1)}>
             &rarr;
           </button>
@@ -83,21 +69,20 @@ function CalendarPage({ tasks = [] }) {
       </h2>
 
       <div className="calendar-grid">
-        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
-          (day) => (
-            <div className="calendar-weekday" key={day}>
-              {day}
-            </div>
-          )
-        )}
+        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+          <div className="calendar-weekday" key={day}>
+            {day}
+          </div>
+        ))}
 
         {calendarDays.map((day, index) => {
           const dayTasks = getTasksForDay(day);
           const isSelected = selectedDate === day;
+          const today = new Date();
           const isToday =
-            day === new Date().getDate() &&
-            month === new Date().getMonth() &&
-            year === new Date().getFullYear();
+            day === today.getDate() &&
+            month === today.getMonth() &&
+            year === today.getFullYear();
 
           return (
             <button
@@ -115,7 +100,6 @@ function CalendarPage({ tasks = [] }) {
               {day && (
                 <>
                   <span className="calendar-day-number">{day}</span>
-
                   <span className="calendar-day-tasks">
                     {dayTasks.slice(0, 2).map((task) => (
                       <span
@@ -126,7 +110,6 @@ function CalendarPage({ tasks = [] }) {
                         {task.title}
                       </span>
                     ))}
-
                     {dayTasks.length > 2 && (
                       <span className="calendar-more">
                         +{dayTasks.length - 2} more
@@ -144,14 +127,11 @@ function CalendarPage({ tasks = [] }) {
         <section className="calendar-selected-tasks">
           <h2>
             Tasks for{" "}
-            {new Date(year, month, selectedDate).toLocaleDateString(
-              "en-US",
-              {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              }
-            )}
+            {new Date(year, month, selectedDate).toLocaleDateString("en-US", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
           </h2>
 
           {selectedTasks.length > 0 ? (
@@ -159,7 +139,9 @@ function CalendarPage({ tasks = [] }) {
               <article className="calendar-task-item" key={task.id}>
                 <strong>{task.title}</strong>
                 <span>
-                  {task.completed ? "Completed" : task.priority || "No priority"}
+                  {task.completed
+                    ? "Completed"
+                    : task.priority || "No priority"}
                 </span>
               </article>
             ))

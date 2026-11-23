@@ -1,18 +1,11 @@
+function Statistics({ stats }) {
+  const totalTasks = Number(stats?.total_tasks ?? 0);
+  const completedTasks = Number(stats?.completed_tasks ?? 0);
+  const remainingTasks =
+    Number(stats?.pending_tasks ?? 0) + Number(stats?.in_progress_tasks ?? 0);
 
-
-function Statistics({tasks}){
-   
-
-    const totalTasks = tasks.length;
-
-    const completedTasks = tasks.filter(
-        task => task.completed
-    ).length;
-
-    const remainingTasks = totalTasks - completedTasks;
-   
-    return (
-         <section className="stats">
+  return (
+    <section className="stats">
       <div className="stat-card">
         <h2>{totalTasks}</h2>
         <p>Total Tasks</p>
@@ -28,9 +21,7 @@ function Statistics({tasks}){
         <p>Remaining</p>
       </div>
     </section>
-    )
-
-
+  );
 }
 
-export default Statistics
+export default Statistics;

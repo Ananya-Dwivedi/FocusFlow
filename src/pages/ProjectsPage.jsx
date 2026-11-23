@@ -1,57 +1,125 @@
-
 import { useEffect, useState } from "react";
-
-function loadProjects() {
-  try {
-    const savedProjects = localStorage.getItem("focusflow-projects");
-    return savedProjects ? JSON.parse(savedProjects) : [];
-  } catch {
-    return [];
-  }
-}
+import { useAuth } from "../context/AuthContext.jsx";
 
 function ProjectsPage() {
-  const [projects, setProjects] = useState(loadProjects);
+  const { token } = useAuth();
+  const [projects, setProjects] = useState([]);
   const [projectName, setProjectName] = useState("");
   const [description, setDescription] = useState("");
+  const [editingProject, setEditingProject] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    localStorage.setItem(
-      "focusflow-projects",
-      JSON.stringify(projects)
-    );
-  }, [projects]);
+    async function fetchProjects() {
+      try {
+        setLoading(true);
+        const response = await fetch("http://localhost:5000/api/projects", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
 
-  function handleAddProject(event) {
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to fetch projects");
+        }
+
+        setProjects(data.projects || []);
+        setError("");
+      } catch (requestError) {
+        setError(requestError.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (token) fetchProjects();
+  }, [token]);
+
+  async function handleSubmit(event) {
     event.preventDefault();
 
     const trimmedName = projectName.trim();
-    const trimmedDescription = description.trim();
-
     if (!trimmedName) return;
 
-    const newProject = {
-      id: crypto.randomUUID(),
-      name: trimmedName,
-      description: trimmedDescription,
-      createdAt: new Date().toISOString(),
-    };
+    const isEditing = Boolean(editingProject);
+    const url = isEditing
+      ? `http://localhost:5000/api/projects/${editingProject.id}`
+      : "http://localhost:5000/api/projects";
 
-    setProjects((currentProjects) => [
-      ...currentProjects,
-      newProject,
-    ]);
+    try {
+      const response = await fetch(url, {
+        method: isEditing ? "PATCH" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: trimmedName,
+          description: description.trim(),
+        }),
+      });
 
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Could not save project");
+      }
+
+      if (isEditing) {
+        setProjects((current) =>
+          current.map((project) =>
+            project.id === data.project.id ? data.project : project,
+          ),
+        );
+      } else {
+        setProjects((current) => [data.project, ...current]);
+      }
+
+      resetForm();
+      setError("");
+    } catch (requestError) {
+      setError(requestError.message);
+    }
+  }
+
+  function startEditing(project) {
+    setEditingProject(project);
+    setProjectName(project.name || "");
+    setDescription(project.description || "");
+  }
+
+  function resetForm() {
+    setEditingProject(null);
     setProjectName("");
     setDescription("");
   }
 
-  function handleDeleteProject(projectId) {
-    setProjects((currentProjects) =>
-      currentProjects.filter(
-        (project) => project.id !== projectId
-      )
+  async function handleDeleteProject(projectId) {
+    const confirmed = window.confirm(
+      "Delete this project? Tasks linked to it will remain, but become unassigned.",
     );
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/projects/${projectId}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to delete project");
+      }
+
+      setProjects((current) =>
+        current.filter((project) => project.id !== projectId),
+      );
+      setError("");
+    } catch (requestError) {
+      setError(requestError.message);
+    }
   }
 
   return (
@@ -61,7 +129,7 @@ function ProjectsPage() {
         <p>Organize and track your projects in one place.</p>
       </header>
 
-      <form onSubmit={handleAddProject}>
+      <form onSubmit={handleSubmit}>
         <label htmlFor="project-name">Project name</label>
         <input
           id="project-name"
@@ -79,11 +147,23 @@ function ProjectsPage() {
           placeholder="What do you want to accomplish?"
         />
 
-        <button type="submit">Create project</button>
+        <button type="submit">
+          {editingProject ? "Save changes" : "Create project"}
+        </button>
+
+        {editingProject && (
+          <button type="button" onClick={resetForm}>
+            Cancel edit
+          </button>
+        )}
       </form>
 
+      {error && <p role="alert">{error}</p>}
+
       <div className="projects-list">
-        {projects.length === 0 ? (
+        {loading ? (
+          <p>Loading projects...</p>
+        ) : projects.length === 0 ? (
           <div className="projects-empty-state">
             <h2>No projects yet</h2>
             <p>Create your first project using the form above.</p>
@@ -94,6 +174,9 @@ function ProjectsPage() {
               <h2>{project.name}</h2>
               <p>{project.description || "No description added."}</p>
 
+              <button type="button" onClick={() => startEditing(project)}>
+                Edit project
+              </button>
               <button
                 type="button"
                 onClick={() => handleDeleteProject(project.id)}

@@ -1,5 +1,8 @@
 function taskReducer(state, action) {
   switch (action.type) {
+    case "SET_TASKS":
+      return action.payload;
+
     case "ADD_TASK":
       return [...state, action.payload];
 
